@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Jquery Ajax test</title>
+    <style>
+        .form{
+            height: 300px;
+            max-width: 400px;
+            display: block;
+            border: 2px solid blue;
+        }
+        #test-form{
+            margin: 10px;
+        }
+        #test-form > input{
+            margin: 10px;
+        }
+        .good{
+            background: #2af12a;
+        }
+        .bad{
+            background: #fc0418;
+        }
+        .wrong{
+            background: #fcd704;
+        }
+        .empty{
+            background: #04f4fc;
+        }
+        #msg{
+            border-radius: 5px;
+            display: block;
+            width: 200px;
+            height: 30px;
+            padding: 10px;
+        }
+        table, th, td{
+            border: 1px solid black;
+        }
+    </style>
+    <script src="../jquery.js"></script>
+    <script src="../isLoading.js"></script>
+    <script src="search.js"></script>
+</head>
+<body>
+    
+    <div class="form">
+        <form id="test-form" method="post">
+            <input type="text" name="name" placeholder="name">
+            <input type="email" name="email" placeholder="email">
+            <input type="text" name="address" placeholder="address">
+            <input type="text" name="phone" placeholder="phone">
+            <input id="btn" type="submit" name="submit">
+
+            <span id="msg"></span>
+        </form>
+    </div>
+
+    <div class="users">
+        <table id="users-list">
+            <tr>
+                <th>NAME</th>
+                <th>EMAIL</th>
+                <th>ADDRESS</th>
+                <th>PHONE</th>
+            </tr>
+        </table>
+    </div>
+
+    <div class="search">
+        <input type="text" name="search-bar" id="search-bar">
+        <span id="search-result">
+            <ul id="search-result-ul"></ul>
+        </span>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+
+            function showMsg(msg,type) {
+                $('#msg').html(msg);
+                $('#msg').removeAttr('class');
+                $('#msg').addClass(type);
+            }
+            
+            $('#test-form').submit(function(e){
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "test1.php",
+                    data: $('#test-form').serialize(),
+                    success: function(response)
+                    {
+                        const {ans} = JSON.parse(response);
+                        //ENTRY GETS INTO THE DATABASE, MESAGE GOOD
+                        if (ans == "1") {
+                            $( "input" ).isLoading({ text: "Loading", position: "inside" });
+                            setTimeout(function() {
+                                $( "input" ).isLoading( "hide" ); 
+                            }, 1500);
+                            setTimeout(function() {
+                                showMsg('Entry successful','good'); 
+                            },1600);
+                            setTimeout(function() {
+                                showUsers();
+                            },1650);
+                            
+                        } else if(ans == "0"){
+                            $( "input" ).isLoading({ text: "Loading", position: "inside" });
+                            setTimeout(function() {
+                                $( "input" ).isLoading( "hide" ); 
+                            }, 1500);
+                            setTimeout(function() {
+                                showMsg('Something Went Wrong','bad'); 
+                            },1600);
+                            
+                        }else if(ans == "2"){
+                            $( "input" ).isLoading({ text: "Loading", position: "inside" });
+                            setTimeout(function() {
+                                $( "input" ).isLoading( "hide" ); 
+                            }, 1500);
+                            setTimeout(function() {
+                                showMsg('Entry already exists','wrong'); 
+                            },1600);
+                        }else if (ans == "10") {
+                            $( ".load" ).isLoading({ text: "Loading...", position: "inside" });
+                            setTimeout(function() {
+                                $( ".load" ).isLoading( "hide" ); 
+                            }, 1500);
+                            setTimeout(function() {
+                                showMsg('Some Entries Are Missing', 'empty'); 
+                            },1600);
+                        }
+                    }
+                });
+            });
+
+            function showUsers() {
+                $.ajax({
+                    type: "POST",
+                    url: "loadUsers.php",
+                    dataType: "JSON",
+                    success: function(users) {
+                        users.forEach(user => {
+                            $('#users-list').append(
+                                "<tr>" 
+                                + "<td>" +user.name+"</td>"
+                                + "<td>" +user.email+"</td>"
+                                + "<td>" +user.address+"</td>"
+                                + "<td>" +user.phone+"</td>"
+                                + "</tr>"
+                            );
+                        });
+                    }
+                });
+            }
+
+            showUsers();
+        });
+    </script>
+
+
+</body>
+</html>

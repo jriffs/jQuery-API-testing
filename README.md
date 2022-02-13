@@ -1,0 +1,1 @@
+simple project to test API calls with AJAX in jQuery ... made using jQuery, HTML, PHP and MySQL. 
